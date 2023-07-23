@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './GetUrlData.css'; // Import the CSS file
 
 const GetUrlData = () => {
   const [urls, setUrls] = useState([]);
@@ -29,7 +30,7 @@ const GetUrlData = () => {
   }, [urls]);
 
   return (
-    <div>
+    <div className="data-container">
       <h2>Data from URLs:</h2>
       <ul>
         {dataResponses.map((numbers, index) => (
