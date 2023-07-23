@@ -41,21 +41,19 @@ const GetUrlData = () => {
     setUrls(urlValues);
   };
 
-  return (
+ return (
     <div className="data-container">
       <h2>Data from URLs:</h2>
       <button className="fetch-button" onClick={handleFetchData}>Fetch Data</button>
       {error ? (
         <p>Error fetching data: {error.message}</p>
       ) : (
-        <ul>
-          {dataResponses.map((numbers, index) => (
-            <li key={index}>{numbers.sort((a, b) => a - b).filter((value, index, self) => self.indexOf(value) === index).join(', ')}</li>
-          ))}
-        </ul>
+    
+          dataResponses.map((numbers, index) => (
+            <h3 key={index}>{numbers.sort((a, b) => a - b).filter((value, index, self) => self.indexOf(value) === index).join(', ')}</h3>
+          ))
+        
       )}
     </div>
   );
-};
-
 export default GetUrlData;
