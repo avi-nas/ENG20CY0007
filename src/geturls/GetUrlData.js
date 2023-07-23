@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './GetUrlData.css'; // Import the CSS file
+import './GetUrlData.css';
 
 const GetUrlData = () => {
   const [urls, setUrls] = useState([]);
@@ -22,7 +22,6 @@ const GetUrlData = () => {
           })
         );
     
-        // Filter out the responses that are not timeout errors
         const validResponses = responses.filter((response) => !(response instanceof Error && response.message === 'Timeout'));
     
         setDataResponses(
