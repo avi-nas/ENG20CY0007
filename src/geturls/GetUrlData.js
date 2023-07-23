@@ -1,51 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './GetUrlData.css';
 
 const GetUrlData = () => {
   const [urls, setUrls] = useState([]);
   const [dataResponses, setDataResponses] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const validResponses = await Promise.all(
+          urls.map(async (url) => {
+            try {
+              const response = await Promise.race([
+                axios.get(url),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 500))
+              ]);
+              return response.data.numbers;
+            } catch (error) {
+              return null;
+            }
+          })
+        );
+
+        const filteredResponses = validResponses.filter((response) => response !== null);
+        setDataResponses(filteredResponses);
+      } catch (error) {
+        setError(error);
+      }
+    };
+
+    if (urls.length > 0) {
+      fetchData();
+    }
+  }, [urls]);
+
+  const handleFetchData = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlValues = urlParams.getAll('url');
     setUrls(urlValues);
-
-    const fetchData = async () => {
-      try {
-        const responses = await Promise.all(
-          urls.map((url) => {
-            return Promise.race([
-              axios.get(url),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 500))
-            ]);
-          })
-        );
-    
-        const validResponses = responses.filter((response) => !(response instanceof Error && response.message === 'Timeout'));
-    
-        setDataResponses(
-          validResponses.map((response) =>
-            response.data.numbers.sort((a, b) => a - b).filter((value, index, self) => self.indexOf(value) === index)
-          )
-        );
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    
-
-    fetchData();
-  }, [urls]);
+  };
 
   return (
     <div className="data-container">
       <h2>Data from URLs:</h2>
-      <ul>
-        {dataResponses.map((numbers, index) => (
-          <li key={index}>{JSON.stringify(numbers)}</li>
-        ))}
-      </ul>
+      <button className="fetch-button" onClick={handleFetchData}>Fetch Data</button>
+      {error ? (
+        <p>Error fetching data: {error.message}</p>
+      ) : (
+        <ul>
+          {dataResponses.map((numbers, index) => (
+            <li key={index}>{numbers.sort((a, b) => a - b).filter((value, index, self) => self.indexOf(value) === index).join(', ')}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
