@@ -14,10 +14,19 @@ const GetUrlData = () => {
     const fetchData = async () => {
       try {
         const responses = await Promise.all(
-          urls.map((url) => axios.get(url))
+          urls.map((url) => {
+            return Promise.race([
+              axios.get(url),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 500))
+            ]);
+          })
         );
+    
+        // Filter out the responses that are not timeout errors
+        const validResponses = responses.filter((response) => !(response instanceof Error && response.message === 'Timeout'));
+    
         setDataResponses(
-          responses.map((response) =>
+          validResponses.map((response) =>
             response.data.numbers.sort((a, b) => a - b).filter((value, index, self) => self.indexOf(value) === index)
           )
         );
@@ -25,6 +34,7 @@ const GetUrlData = () => {
         console.error('Error fetching data:', error);
       }
     };
+    
 
     fetchData();
   }, [urls]);
